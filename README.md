@@ -1,62 +1,50 @@
-# Express.js RESTful API Assignment
+ Week 2 — Express.js RESTful API (MongoDB/Mongoose)
 
-This assignment focuses on building a RESTful API using Express.js, implementing proper routing, middleware, and error handling.
+A production-style Express API wired to MongoDB via Mongoose. Includes routing, validation, auth (API key), error handling, filtering, search, sorting, and pagination.
 
-## Assignment Overview
+ Quick Start
 
-You will:
-1. Set up an Express.js server
-2. Create RESTful API routes for a product resource
-3. Implement custom middleware for logging, authentication, and validation
-4. Add comprehensive error handling
-5. Develop advanced features like filtering, pagination, and search
+```bash
+npm install
+cp .env.example .env
+# Edit .env -> MONGODB_URI=mongodb://127.0.0.1:27017/week2_products (or Atlas URI)
+npm run seed     # optional: seed sample products
+npm start        # http://localhost:${PORT:-3000}
+```
 
-## Getting Started
+ .env
 
-1. Accept the GitHub Classroom assignment invitation
-2. Clone your personal repository that was created by GitHub Classroom
-3. Install dependencies:
-   ```
-   npm install
-   ```
-4. Run the server:
-   ```
-   npm start
-   ```
+```
+PORT=3000
+API_KEY=changeme-dev-key
+# Local:
+MONGODB_URI=mongodb://127.0.0.1:27017/week2_products
+# Atlas example:
+# MONGODB_URI="mongodb+srv://<user>:<pass>@<cluster-url>/week2_products?retryWrites=true&w=majority"
+```
 
-## Files Included
+ Endpoints
 
-- `Week2-Assignment.md`: Detailed assignment instructions
-- `server.js`: Starter Express.js server file
-- `.env.example`: Example environment variables file
+- `GET /api/products` — list (supports `q`, `category`, `minPrice`, `maxPrice`, `sort`, `order`, `page`, `limit`, `fields`)
+- `GET /api/products/:id`
+- `POST /api/products` *(protected: header `x-api-key`)*
+- `PUT /api/products/:id` *(protected)*
+- `DELETE /api/products/:id` *(protected)*
 
-## Requirements
+ Examples
 
-- Node.js (v18 or higher)
-- npm or yarn
-- Postman, Insomnia, or curl for API testing
+```bash
+# List with search + pagination
+curl "http://localhost:3000/api/products?q=hat&minPrice=1000&sort=price&order=asc&page=1&limit=5&fields=name,price"
 
-## API Endpoints
+# Create
+curl -X POST http://localhost:3000/api/products   -H "Content-Type: application/json" -H "x-api-key: changeme-dev-key"   -d '{"name":"Bottle","price":1800,"category":"home","stock":5}'
 
-The API will have the following endpoints:
+# Update
+curl -X PUT "http://localhost:3000/api/products/<id>"   -H "Content-Type: application/json" -H "x-api-key: changeme-dev-key"   -d '{"price":1500}'
+```
 
-- `GET /api/products`: Get all products
-- `GET /api/products/:id`: Get a specific product
-- `POST /api/products`: Create a new product
-- `PUT /api/products/:id`: Update a product
-- `DELETE /api/products/:id`: Delete a product
-
-## Submission
-
-Your work will be automatically submitted when you push to your GitHub Classroom repository. Make sure to:
-
-1. Complete all the required API endpoints
-2. Implement the middleware and error handling
-3. Document your API in the README.md
-4. Include examples of requests and responses
-
-## Resources
-
-- [Express.js Documentation](https://expressjs.com/)
-- [RESTful API Design Best Practices](https://restfulapi.net/)
-- [HTTP Status Codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) 
+ Notes
+- Uses a Mongoose text index on `name` and `description` to power `q` search (falls back to regex if index not built yet).
+- Centralized error handling with helpful HTTP responses.
+- Swap auth to JWT or session easily later.
